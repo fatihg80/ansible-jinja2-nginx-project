@@ -1,0 +1,30 @@
+---
+- name: Deploy nginx config using Jinja2 template
+  hosts: webservers
+  become: true
+
+  pre_tasks:
+    - name: Ensure nginx is installed
+      package:
+        name: nginx
+        state: present
+
+    - name: Ensure nginx service is enabled and running
+      service:
+        name: nginx
+        enabled: true
+        state: started
+
+  tasks:
+    - name: Generate nginx config from template
+      template:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/conf.d/default.conf
+        mode: '0644'
+      notify: restart nginx
+
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
